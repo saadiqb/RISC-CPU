@@ -18,7 +18,7 @@ module Division(
             Q = 32'hFFFFFFFF;
         end else begin
             for (i = 0; i < 32; i = i + 1) begin
-                {A, Q} = {A, Q} << 1; // Left shift A and Q [cite: 16]
+                {A, Q} = {A, Q} << 1;
                 A = A - M;
                 if (A[31] == 1'b1) begin // If A < 0
                     Q[0] = 1'b0;
