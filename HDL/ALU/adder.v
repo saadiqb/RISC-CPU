@@ -2,7 +2,7 @@
 module adder(
     input [31:0] A, B,
     input sub_ctrl,          // High for Subtraction
-    output [31:0] Result
+    output reg [31:0] Result
 );
     wire [31:0] B_complement;
     reg [32:0] carry;
@@ -12,13 +12,14 @@ module adder(
     assign B_complement = (sub_ctrl) ? ~B : B;
 
     always @(*) begin
+        carry = 33'b0;
         // Carry-in is 1 for subtraction to complete the +1 for 2's complement
-        carry[0] = sub_ctrl; 
+        carry[0] = sub_ctrl;
         for (i = 0; i < 32; i = i + 1) begin
             // Manual logic for Full Adder: Sum = A ^ B ^ Cin
             Result[i] = A[i] ^ B_complement[i] ^ carry[i];
             // Manual logic for Carry Out: Cout = (A & B) | (Cin & (A ^ B))
-            carry[i+1] = (A[i] & B_complement[i]) | (carry[i] & (A[i] | B_complement[i]));
+            carry[i+1] = (A[i] & B_complement[i]) | (carry[i] & (A[i] ^ B_complement[i]));
         end
     end
 endmodule
