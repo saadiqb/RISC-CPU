@@ -1,21 +1,24 @@
-// Ripple Carry Adder
-module adder(A, B, Result);
+// adder.v - handles subtraction as well
+module adder(
+    input [31:0] A, B,
+    input sub_ctrl,          // High for Subtraction
+    output [31:0] Result
+);
+    wire [31:0] B_complement;
+    reg [32:0] carry;
+    integer i;
 
-input [7:0] A, B;
-output [7:0] Result;
+    // Use bitwise XOR for 2's complement inversion if sub_ctrl is high
+    assign B_complement = (sub_ctrl) ? ~B : B;
 
-reg [7:0] Result;
-reg [8:0] LocalCarry;
-
-integer i;
-
-always@(A or B)
-	begin
-		LocalCarry = 9'd0;
-		for(i = 0; i < 8; i = i + 1)
-		begin
-				Result[i] = A[i]^B[i]^LocalCarry[i];
-				LocalCarry[i+1] = (A[i]&B[i])|(LocalCarry[i]&(A[i]|B[i]));
-		end
-end
+    always @(*) begin
+        // Carry-in is 1 for subtraction to complete the +1 for 2's complement
+        carry[0] = sub_ctrl; 
+        for (i = 0; i < 32; i = i + 1) begin
+            // Manual logic for Full Adder: Sum = A ^ B ^ Cin
+            Result[i] = A[i] ^ B_complement[i] ^ carry[i];
+            // Manual logic for Carry Out: Cout = (A & B) | (Cin & (A ^ B))
+            carry[i+1] = (A[i] & B_complement[i]) | (carry[i] & (A[i] | B_complement[i]));
+        end
+    end
 endmodule
