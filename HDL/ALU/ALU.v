@@ -5,15 +5,19 @@ module ALU(
 );
     wire [31:0] add_sub_res, shift_res;
     wire [63:0] div_res; // From your division.v
+
     // Instantiate your separate modules here
-    // adder add_unit(A, B, add_sub_res);
-    // Shifter shift_unit(B, A[4:0], ALU_op, shift_res);
-    // Division div_unit(A, B, div_res);
+    adder add_unit(A, B, add_sub_res);
+    Shifter shift_unit(B, A[4:0], ALU_op, shift_res);
+    Division div_unit(A, B, div_res);
 
     always @(*) begin
         case(ALU_op)
             // Add case logic to select between adder, shifter, divider, etc.
-            // Example: 5'b00001: C = {32'b0, add_sub_res}; 
+            5'b00011: C = div_res;
+            5'b00100: C = {32'b0, shift_res};
+            
+            default: C = 64'b0;
         endcase
     end
 endmodule

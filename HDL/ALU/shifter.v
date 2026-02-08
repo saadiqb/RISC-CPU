@@ -6,11 +6,11 @@ module Shifter(
 );
     always @(*) begin
         case(op_sel)
-            3'b000: data_out = data_in >> shift_count;               // SHR [cite: 559]
-            3'b001: data_out = $signed(data_in) >>> shift_count;    // SHRA [cite: 561]
-            3'b010: data_out = data_in << shift_count;               // SHL [cite: 564]
-            3'b011: data_out = (data_in >> shift_count) | (data_in << (32 - shift_count)); // ROR [cite: 568]
-            3'b100: data_out = (data_in << shift_count) | (data_in >> (32 - shift_count)); // ROL [cite: 570]
+            3'b000: data_out = data_in >> shift_count;               // SHR 
+            3'b001: data_out = $signed(data_in) >>> shift_count;    // SHRA 
+            3'b010: data_out = data_in << shift_count;               // SHL
+            3'b011: data_out = (data_in >> shift_count) | (data_in << (32 - shift_count)); // ROR 
+            3'b100: data_out = (data_in << shift_count) | (data_in >> (32 - shift_count)); // ROL 
             default: data_out = 32'h0;
         endcase
     end
