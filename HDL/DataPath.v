@@ -5,7 +5,7 @@ module DataPath(
     input wire R8in, R9in, R10in, R11in, R12in, R13in, R14in, R15in,
     input wire R0out, R1out, R2out, R3out, R4out, R5out, R6out, R7out,
     input wire R8out, R9out, R10out, R11out, R12out, R13out, R14out, R15out,
-    input wire PCin, PCout, IRin, Yin, Zin, HIin, LOin, MARin, MDRin, MDRout, Read,
+    input wire PCin, PCout, IncPC, IRin, Yin, Zin, HIin, LOin, MARin, MDRin, MDRout, Read,
     input wire Zhighout, Zlowout, HIout, LOout, InPortout, Cout,
     input wire [4:0] ALU_op,
     input wire [31:0] Mdatain,
@@ -15,7 +15,8 @@ module DataPath(
     wire [31:0] R_data [0:15];
     wire [31:0] Y_data, HI_data, LO_data, PC_data, MDR_data, MAR_data, IR_data;
     wire [31:0] InPort_data, C_sign_extended;
-    wire [63:0] Z_data, ALU_out;
+    wire [63:0] Z_data, ALU_out, Z_in;
+    wire [31:0] PC_inc;
 
     assign InPort_data = 32'b0;
     assign C_sign_extended = 32'b0;
@@ -38,8 +39,11 @@ module DataPath(
     register R14(.clear(clear), .clock(clock), .enable(R14in), .BusMuxOut(BusMuxOut), .BusMuxIn(R_data[14]));
     register R15(.clear(clear), .clock(clock), .enable(R15in), .BusMuxOut(BusMuxOut), .BusMuxIn(R_data[15]));
 
+    assign PC_inc = PC_data + 32'd1;
+    assign Z_in = IncPC ? {32'b0, PC_inc} : ALU_out;
+
     // Dedicated registers
-    register #(.DATA_WIDTH(64)) Z(.clear(clear), .clock(clock), .enable(Zin), .BusMuxOut(ALU_out), .BusMuxIn(Z_data));
+    register #(.DATA_WIDTH(64)) Z(.clear(clear), .clock(clock), .enable(Zin), .BusMuxOut(Z_in), .BusMuxIn(Z_data));
     register Y(.clear(clear), .clock(clock), .enable(Yin), .BusMuxOut(BusMuxOut), .BusMuxIn(Y_data));
     register PC(.clear(clear), .clock(clock), .enable(PCin), .BusMuxOut(BusMuxOut), .BusMuxIn(PC_data));
     register HI(.clear(clear), .clock(clock), .enable(HIin), .BusMuxOut(BusMuxOut), .BusMuxIn(HI_data));
