@@ -6,7 +6,7 @@ module DataPath(
     input wire R0out, R1out, R2out, R3out, R4out, R5out, R6out, R7out,
     input wire R8out, R9out, R10out, R11out, R12out, R13out, R14out, R15out,
     input wire PCin, PCout, IncPC, IRin, Yin, Zin, HIin, LOin, MARin, MDRin, MDRout, 
-    input wire Read, Write, // Added Write signal, removed Mdatain [cite: 1346, 1347, 1534]
+    input wire Read, Write, // Added Write signal, removed Mdatain
     input wire Zhighout, Zlowout, HIout, LOout, 
     input wire InPortout, Cout,
     input wire [4:0] ALU_op,
@@ -19,7 +19,7 @@ module DataPath(
     wire [63:0] Z_data, ALU_out, Z_in;
     wire [31:0] PC_inc;
     
-    // Internal wire for RAM output -> MDR input [cite: 1535]
+    // Internal wire for RAM output -> MDR input
     wire [31:0] Mdatain; 
 
     assign InPort_data = 32'b0;
