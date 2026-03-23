@@ -5,10 +5,11 @@ module DataPath(
     input wire R8in, R9in, R10in, R11in, R12in, R13in, R14in, R15in,
     input wire R0out, R1out, R2out, R3out, R4out, R5out, R6out, R7out,
     input wire R8out, R9out, R10out, R11out, R12out, R13out, R14out, R15out,
-    input wire PCin, PCout, IncPC, IRin, Yin, Zin, HIin, LOin, MARin, MDRin, MDRout, Read,
-    input wire Zhighout, Zlowout, HIout, LOout, InPortout, Cout,
+    input wire PCin, PCout, IncPC, IRin, Yin, Zin, HIin, LOin, MARin, MDRin, MDRout, 
+    input wire Read, Write, // Added Write signal, removed Mdatain [cite: 1346, 1347, 1534]
+    input wire Zhighout, Zlowout, HIout, LOout, 
+    input wire InPortout, Cout,
     input wire [4:0] ALU_op,
-    input wire [31:0] Mdatain,
     output wire [31:0] BusMuxOut_out // Output for observation
 );
     wire [31:0] BusMuxOut;
@@ -17,6 +18,9 @@ module DataPath(
     wire [31:0] InPort_data, C_sign_extended;
     wire [63:0] Z_data, ALU_out, Z_in;
     wire [31:0] PC_inc;
+    
+    // Internal wire for RAM output -> MDR input [cite: 1535]
+    wire [31:0] Mdatain; 
 
     assign InPort_data = 32'b0;
     assign C_sign_extended = 32'b0;
@@ -50,11 +54,31 @@ module DataPath(
     register LO(.clear(clear), .clock(clock), .enable(LOin), .BusMuxOut(BusMuxOut), .BusMuxIn(LO_data));
     register MAR(.clear(clear), .clock(clock), .enable(MARin), .BusMuxOut(BusMuxOut), .BusMuxIn(MAR_data));
     register IR(.clear(clear), .clock(clock), .enable(IRin), .BusMuxOut(BusMuxOut), .BusMuxIn(IR_data));
-    mdr_unit mdr(.clear(clear), .clock(clock), .MDRin(MDRin), .Read(Read), .BusMuxOut(BusMuxOut), .Mdatain(Mdatain), .BusMuxInMDR(MDR_data));
+    
+    // MDR Unit
+    mdr_unit mdr(
+        .clear(clear), 
+        .clock(clock), 
+        .MDRin(MDRin), 
+        .Read(Read), 
+        .BusMuxOut(BusMuxOut), 
+        .Mdatain(Mdatain), 
+        .BusMuxInMDR(MDR_data)
+    );
+
+    // Memory Subsystem Instantiation
+    ram memory_unit(
+        .clk(clock),
+        .read(Read),
+        .write(Write),
+        .address(MAR_data[8:0]), // MAR output mapped to RAM address 
+        .data_in(MDR_data),      // MDR output mapped to RAM data input
+        .data_out(Mdatain)       // RAM output mapped to MDR data input MUX
+    );
 
     // ALU Integration
     ALU alu_inst(.A(Y_data), .B(BusMuxOut), .ALU_op(ALU_op), .C(ALU_out));
-
+    
     // Bus Integration
     Bus bus_inst(
         .BusMuxInR0(R_data[0]), .BusMuxInR1(R_data[1]), .BusMuxInR2(R_data[2]), .BusMuxInR3(R_data[3]),
@@ -65,12 +89,12 @@ module DataPath(
         .BusMuxInZhigh(Z_data[63:32]), .BusMuxInZlow(Z_data[31:0]),
         .BusMuxInPC(PC_data), .BusMuxInMDR(MDR_data), .BusMuxInInPort(InPort_data),
         .C_sign_extended(C_sign_extended),
-        .R0out(R0out), .R1out(R1out), .R2out(R2out), .R3out(R3out), .R4out(R4out), .R5out(R5out), .R6out(R6out), .R7out(R7out),
+        .R0out(R0out), .R1out(R1out), .R2out(R2out), .R3out(R3out), .R4out(R4out), 
+        .R5out(R5out), .R6out(R6out), .R7out(R7out),
         .R8out(R8out), .R9out(R9out), .R10out(R10out), .R11out(R11out), .R12out(R12out), .R13out(R13out), .R14out(R14out), .R15out(R15out),
         .HIout(HIout), .LOout(LOout), .Zhighout(Zhighout), .Zlowout(Zlowout),
         .PCout(PCout), .MDRout(MDRout), .InPortout(InPortout), .Cout(Cout),
         .BusMuxOut(BusMuxOut)
     );
-
     assign BusMuxOut_out = BusMuxOut;
 endmodule
