@@ -1,0 +1,53 @@
+module select_and_encode (
+    input  [31:0] IR,        // Instruction register
+    input         Gra,       // Select Ra
+    input         Grb,       // Select Rb
+    input         Grc,       // Select Rc
+    input         Rin,       // Register input enable
+    input         Rout,      // Register output enable
+    input         BAout,     // Bus A output enable
+    input         Cout,      // Constant/immediate output enable
+
+    output [15:0] Rin_bus,   // One-hot write signals
+    output [15:0] Rout_bus,  // One-hot read signals
+    output [31:0] C_bus      // Sign-extended immediate output
+);
+
+    // Extract fields from IR
+    wire [3:0] Ra = IR[26:23];
+    wire [3:0] Rb = IR[22:19];
+    wire [3:0] Rc = IR[18:15];
+
+    // Immediate field (19 bits)
+    wire [18:0] imm19 = IR[18:0];
+
+    // Gate each register field
+    wire [3:0] Ra_gated = Gra ? Ra : 4'b0000;
+    wire [3:0] Rb_gated = Grb ? Rb : 4'b0000;
+    wire [3:0] Rc_gated = Grc ? Rc : 4'b0000;
+
+    // Combine selected register index
+    wire [3:0] reg_select = Ra_gated | Rb_gated | Rc_gated;
+
+    // 4-to-16 decoder
+    reg [15:0] decoder_out;
+    always @(*) begin
+        decoder_out = 16'b0;
+        decoder_out[reg_select] = 1'b1;
+    end
+
+    // Enable signals
+    wire write_enable = Rin;
+    wire read_enable  = Rout | BAout;
+
+    // One-hot outputs
+    assign Rin_bus  = write_enable ? decoder_out : 16'b0;
+    assign Rout_bus = read_enable  ? decoder_out : 16'b0;
+
+    // Sign extension (19-bit to 32-bit)
+    wire [31:0] sign_ext_imm = {{13{imm19[18]}}, imm19};
+
+    // Output controlled by Cout
+    assign C_bus = Cout ? sign_ext_imm : 32'b0;
+
+endmodule
