@@ -7,9 +7,9 @@ module Phase2_tb;
     // --- Select and Encode Control Signals ---
     reg Gra, Grb, Grc, Rin_ctrl, Rout_ctrl, BAout;
     
-    // --- Core Datapath Signals ---
+// --- Core Datapath Signals ---
     reg PCin, PCout, IncPC, IRin, Yin, Zin, HIin, LOin, MARin, MDRin, MDRout;
-    reg Read, Write, Zhighout, Zlowout, HIout, LOout, Cout;
+    reg Read, Write, Zhighout, Zlowout, HIout, LOout, Cout, InPortout;
     
     // --- Branching and I/O ---
     reg CONin, OutPortin, InPortin;

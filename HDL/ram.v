@@ -9,9 +9,10 @@ module ram (
     // 512 x 32-bit memory array
     reg [31:0] memory [0:511]; 
 
+    integer i; 
+
     // Initialize all memory to 0 to avoid undefined 'x' states in simulation
     initial begin
-        integer i;
         for (i = 0; i < 512; i = i + 1) begin
             memory[i] = 32'b0;
         end
