@@ -1,0 +1,71 @@
+[*]
+[*] GTKWave Analyzer v3.4.0 (w)1999-2022 BSI
+[*] Tue Mar 24 02:16:05 2026
+[*]
+[dumpfile] "/Users/saadiqbal/Documents/School/ELEC3744/RISC-CPU/sim/phase2.vcd"
+[dumpfile_mtime] "Tue Mar 24 02:10:28 2026"
+[dumpfile_size] 63950
+[savefile] "/Users/saadiqbal/Documents/School/ELEC3744/RISC-CPU/sim/Phase2SignalsPreloadedforViewing.gtkw.gtkw"
+[timestart] 0
+[size] 1680 987
+[pos] -1 -1
+*-16.773872 708100 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[markername] AA
+[markername] BB
+[markername] CC
+[markername] DD
+[markername] EE
+[markername] FF
+[markername] GG
+[markername] HH
+[markername] II
+[markername] JJ
+[markername] KK
+[markername] LL
+[markername] MM
+[markername] NN
+[markername] OO
+[markername] PP
+[markername] QQ
+[markername] RR
+[markername] SS
+[markername] TT
+[markername] UU
+[markername] VV
+[markername] WW
+[markername] XX
+[markername] YY
+[markername] ZZ
+[treeopen] Phase2_tb.
+[treeopen] Phase2_tb.DUT.
+[sst_width] 255
+[signals_width] 136
+[sst_expanded] 1
+[sst_vpaned_height] 315
+@28
+Phase2_tb.PCout
+Phase2_tb.MARin
+Phase2_tb.IncPC
+Phase2_tb.Zin
+Phase2_tb.Zlowout
+Phase2_tb.PCin
+Phase2_tb.Read
+@421
+Phase2_tb.DUT.Mdatain[31:0]
+@28
+Phase2_tb.MDRin
+Phase2_tb.MDRout
+Phase2_tb.IRin
+Phase2_tb.Grb
+Phase2_tb.BAout
+Phase2_tb.Yin
+Phase2_tb.Cout
+@22
+Phase2_tb.DUT.ALU_op[4:0]
+@28
+Phase2_tb.Zin
+Phase2_tb.Zlowout
+Phase2_tb.MARin
+Phase2_tb.Read
+[pattern_trace] 1
+[pattern_trace] 0

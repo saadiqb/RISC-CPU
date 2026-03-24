@@ -6,7 +6,7 @@ module Bus (
     input wire [31:0] BusMuxInHI, BusMuxInLO, BusMuxInZhigh, BusMuxInZlow,
     input wire [31:0] BusMuxInPC, BusMuxInMDR, BusMuxInInPort,
     input wire [31:0] C_sign_extended,
-    // Control signals from Control Unit (Phase 3) or Testbench (Phase 1)
+    // Bus source selects: driven by testbench (Phase 2) or by a control unit in a later phase
     input wire R0out, R1out, R2out, R3out, R4out, R5out, R6out, R7out,
     input wire R8out, R9out, R10out, R11out, R12out, R13out, R14out, R15out,
     input wire HIout, LOout, Zhighout, Zlowout, PCout, MDRout, InPortout, Cout,
