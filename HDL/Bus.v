@@ -6,6 +6,8 @@ module Bus (
     input wire [31:0] BusMuxInHI, BusMuxInLO, BusMuxInZhigh, BusMuxInZlow,
     input wire [31:0] BusMuxInPC, BusMuxInMDR, BusMuxInInPort,
     input wire [31:0] C_sign_extended,
+    // For the revision to R0
+	input wire BAout;
     // Control signals from Control Unit (Phase 3) or Testbench (Phase 1)
     input wire R0out, R1out, R2out, R3out, R4out, R5out, R6out, R7out,
     input wire R8out, R9out, R10out, R11out, R12out, R13out, R14out, R15out,
@@ -25,7 +27,7 @@ module Bus (
     // 32:1 Multiplexer
     always @(*) begin
         case(SelectSignal)
-            5'd0: BusMuxOut = BusMuxInR0;
+            5'd0: BusMuxOut = BAout ? 32'b0 : BusMuxInR0;
             5'd1: BusMuxOut = BusMuxInR1;
             5'd2: BusMuxOut = BusMuxInR2;
             5'd3: BusMuxOut = BusMuxInR3;
