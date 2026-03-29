@@ -18,7 +18,7 @@ module control_unit(
 );
 
     // --- State Encoding ---
-    parameter Reset_State = 6'd0, Fetch0 = 6'd1, Fetch1 = 6'd2, Fetch2 = 6'd3;
+    parameter Reset_State = 6'd0, Fetch0 = 6'd1, Fetch1 = 6'd2, Fetch2 = 6'd3, Decode = 6'd35;
     parameter ALU_3 = 6'd4, ALU_4 = 6'd5, ALU_5 = 6'd6; 
     parameter ALUI_3 = 6'd7, ALUI_4 = 6'd8, ALUI_5 = 6'd9; 
     parameter LDI_3 = 6'd10, LDI_4 = 6'd11, LDI_5 = 6'd12;
@@ -90,7 +90,10 @@ module control_unit(
                 Reset_State: present_state <= Fetch0;
                 Fetch0: present_state <= Fetch1;
                 Fetch1: present_state <= Fetch2;
-                Fetch2: begin
+
+                Fetch2: present_state <= Decode;
+                
+                Decode: begin
                     case (IR[31:27])
                         INST_ADD, INST_SUB, INST_AND, INST_OR, INST_SHR, INST_SHRA, 
                         INST_SHL, INST_ROR, INST_ROL, INST_NEG, INST_NOT: 
@@ -182,6 +185,9 @@ module control_unit(
             end
             Fetch2: begin
                 MDRout = 1; IRin = 1;
+            end
+            Decode: begin
+                // Empty state! Signals naturally fall to 0. IR is now locked and stable.
             end
 
             ALU_3: begin
