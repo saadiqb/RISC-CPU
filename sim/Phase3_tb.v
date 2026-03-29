@@ -68,17 +68,17 @@ module Phase3_tb;
         DUT.datapath_inst.memory_unit.memory[9'h018] = 32'h42810000; // rol  R5, R0, R2
         DUT.datapath_inst.memory_unit.memory[9'h019] = 32'h1B900000; // or   R7, R2, R0
         DUT.datapath_inst.memory_unit.memory[9'h01A] = 32'h12280000; // and  R4, R5, R0
-        DUT.datapath_inst.memory_unit.memory[9'h01B] = 32'h7B200089; // st   0x89(R4), R7
+        DUT.datapath_inst.memory_unit.memory[9'h01B] = 32'h7BA00089; // st   0x89(R4), R7
         DUT.datapath_inst.memory_unit.memory[9'h01C] = 32'h082B8000; // sub  R0, R5, R7
         DUT.datapath_inst.memory_unit.memory[9'h01D] = 32'h32290000; // shl  R4, R5, R2
         
         // --- Multiply & Divide Setup ---
         DUT.datapath_inst.memory_unit.memory[9'h01E] = 32'h6B800007; // ldi  R7, 7
         DUT.datapath_inst.memory_unit.memory[9'h01F] = 32'h69800019; // ldi  R3, 0x19
-        DUT.datapath_inst.memory_unit.memory[9'h020] = 32'h59C00000; // mul  R3, R7
+        DUT.datapath_inst.memory_unit.memory[9'h020] = 32'h59B80000; // mul  R3, R7
         DUT.datapath_inst.memory_unit.memory[9'h021] = 32'hA8800000; // mfhi R1
         DUT.datapath_inst.memory_unit.memory[9'h022] = 32'hB3000000; // mflo R6
-        DUT.datapath_inst.memory_unit.memory[9'h023] = 32'h61C00000; // div  R3, R7
+        DUT.datapath_inst.memory_unit.memory[9'h023] = 32'h61B80000; // div  R3, R7
         
         // --- Procedure Setup ---
         DUT.datapath_inst.memory_unit.memory[9'h024] = 32'h6C380002; // ldi  R8,  2(R7)
