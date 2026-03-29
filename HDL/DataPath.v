@@ -20,7 +20,10 @@ module DataPath(
     output wire [31:0] out_port_data, // External data leaving CPU
     output wire CON_out, // Condition flag for branches
 
-    output wire [31:0] BusMuxOut_out // Output for observation
+    output wire [31:0] BusMuxOut_out, // Output for observation
+    
+    // NEW FOR PHASE 3: Expose IR data to the Control Unit for decoding
+    output wire [31:0] IR_data_out 
 );
     wire [31:0] BusMuxOut;
     wire [31:0] R_data [0:15];
@@ -109,7 +112,8 @@ module DataPath(
         .BusMuxInPC(PC_data), .BusMuxInMDR(MDR_data), .BusMuxInInPort(InPort_data),
         .C_sign_extended(C_sign_extended),
 
-        .R0out(Rout_bus[0]),  .R1out(Rout_bus[1]),  .R2out(Rout_bus[2]),  .R3out(Rout_bus[3]),
+        .R0out(Rout_bus[0]),  
+        .R1out(Rout_bus[1]),  .R2out(Rout_bus[2]),  .R3out(Rout_bus[3]),
         .R4out(Rout_bus[4]),  .R5out(Rout_bus[5]),  .R6out(Rout_bus[6]),  .R7out(Rout_bus[7]),
         .R8out(Rout_bus[8]),  .R9out(Rout_bus[9]),  .R10out(Rout_bus[10]), .R11out(Rout_bus[11]),
         .R12out(Rout_bus[12]), .R13out(Rout_bus[13]), .R14out(Rout_bus[14]), .R15out(Rout_bus[15]),
@@ -117,8 +121,14 @@ module DataPath(
         // BAout removed from here as it's now handled by the R0 masking logic directly
         .HIout(HIout), .LOout(LOout), .Zhighout(Zhighout), .Zlowout(Zlowout),
         .PCout(PCout), .MDRout(MDRout), .InPortout(InPortout), .Cout(Cout),
+      
         .BusMuxOut(BusMuxOut)
     );
 
+    // Pass outputs up to the top level
     assign BusMuxOut_out = BusMuxOut;
+    
+    // PHASE 3: Expose Instruction Register to Control Unit
+    assign IR_data_out = IR_data;
+
 endmodule
