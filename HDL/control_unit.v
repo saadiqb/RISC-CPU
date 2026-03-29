@@ -78,7 +78,6 @@ module control_unit(
     reg [5:0] present_state;
     reg run_flag;
 
-    // FSM State Transitions
     always @(posedge clock or posedge reset) begin
         if (reset) begin
             present_state <= Reset_State;
@@ -91,40 +90,32 @@ module control_unit(
                 Reset_State: present_state <= Fetch0;
                 Fetch0: present_state <= Fetch1;
                 Fetch1: present_state <= Fetch2;
-                Fetch2: begin // Decode Instruction
+                Fetch2: begin
                     case (IR[31:27])
-                        // Standard 3-Reg ALU & 2-Reg ALU
                         INST_ADD, INST_SUB, INST_AND, INST_OR, INST_SHR, INST_SHRA, 
                         INST_SHL, INST_ROR, INST_ROL, INST_NEG, INST_NOT: 
                             present_state <= ALU_3;
                             
-                        // Immediate ALU
                         INST_ADDI, INST_ANDI, INST_ORI: present_state <= ALUI_3;
                         
-                        // Memory & Loads
                         INST_LDI: present_state <= LDI_3;
                         INST_LD: present_state <= LD_3;
                         INST_ST: present_state <= ST_3;
                         
-                        // Multiply & Divide
                         INST_MUL, INST_DIV: present_state <= MULDIV_3;
                         
-                        // Move from HI/LO
                         INST_MFHI, INST_MFLO: present_state <= MF_3;
                         
-                        // Branches & Jumps
                         INST_BRMI, INST_BRPL: present_state <= BR_3;
                         INST_JAL: present_state <= JAL_3;
                         INST_JR: present_state <= JR_3;
                         
-                        // Control
                         INST_NOP: present_state <= Fetch0;
                         INST_HALT: present_state <= HALT_State;
                         default: present_state <= Fetch0; 
                     endcase
                 end
 
-                // --- Execution State Chains ---
                 ALU_3: present_state <= ALU_4;
                 ALU_4: present_state <= ALU_5;
                 ALU_5: present_state <= Fetch0;
@@ -163,7 +154,8 @@ module control_unit(
 
                 BR_3: present_state <= BR_4;
                 BR_4: present_state <= BR_5;
-                BR_5: present_state <= Fetch0;
+                BR_5: present_state <= BR_6;
+                BR_6: present_state <= Fetch0;
 
                 HALT_State: present_state <= HALT_State;
                 default: present_state <= Reset_State;
@@ -171,16 +163,13 @@ module control_unit(
         end
     end
 
-    // FSM Outputs (Control Signals)
     always @(*) begin
-        // 1. Default all signals to 0 to prevent latches
         clear = 0; Gra = 0; Grb = 0; Grc = 0; Rin_ctrl = 0; Rout_ctrl = 0; BAout = 0;
         PCin = 0; PCout = 0; IncPC = 0; IRin = 0; Yin = 0; Zin = 0; HIin = 0; LOin = 0; 
         MARin = 0; MDRin = 0; MDRout = 0; Read = 0; Write = 0; Zhighout = 0; Zlowout = 0; 
         HIout = 0; LOout = 0; InPortout = 0; Cout = 0; CONin = 0; OutPortin = 0; InPortin = 0;
         ALU_op = 5'b00000;
 
-        // 2. Assign outputs based on state
         case (present_state)
             Reset_State: begin
                 clear = 1;
@@ -195,13 +184,12 @@ module control_unit(
                 MDRout = 1; IRin = 1;
             end
 
-            // --- Standard ALU (e.g., ADD, SUB, AND, NEG, NOT) ---
             ALU_3: begin
                 Grb = 1; Rout_ctrl = 1; Yin = 1;
             end
             ALU_4: begin
                 if (IR[31:27] == INST_NEG || IR[31:27] == INST_NOT) begin
-                    // 2-Operand instructions (Uses A=0, B=reg)
+                    Grb = 1; Rout_ctrl = 1; 
                     ALU_op = (IR[31:27] == INST_NEG) ? ALU_NEG : ALU_NOT;
                 end else begin
                     Grc = 1; Rout_ctrl = 1; 
@@ -221,7 +209,6 @@ module control_unit(
                 Zlowout = 1; Gra = 1; Rin_ctrl = 1;
             end
 
-            // --- Immediate ALU (e.g., ADDI, ANDI, ORI) ---
             ALUI_3: begin
                 Grb = 1; Rout_ctrl = 1; Yin = 1;
             end
@@ -235,7 +222,6 @@ module control_unit(
                 Zlowout = 1; Gra = 1; Rin_ctrl = 1;
             end
 
-            // --- Multiply & Divide ---
             MULDIV_3: begin
                 Gra = 1; Rout_ctrl = 1; Yin = 1;
             end
@@ -250,14 +236,12 @@ module control_unit(
                 Zhighout = 1; HIin = 1;
             end
 
-            // --- MFHI / MFLO ---
             MF_3: begin
                 if (IR[31:27] == INST_MFHI) HIout = 1;
                 else LOout = 1;
                 Gra = 1; Rin_ctrl = 1;
             end
 
-            // --- LDI (Load Immediate) ---
             LDI_3: begin
                 Grb = 1; BAout = 1; Yin = 1; 
             end
@@ -268,7 +252,6 @@ module control_unit(
                 Zlowout = 1; Gra = 1; Rin_ctrl = 1;
             end
 
-            // --- LD (Load from Memory) ---
             LD_3: begin
                 Grb = 1; BAout = 1; Yin = 1;
             end
@@ -285,7 +268,6 @@ module control_unit(
                 MDRout = 1; Gra = 1; Rin_ctrl = 1;
             end
 
-            // --- ST (Store to Memory) ---
             ST_3: begin
                 Grb = 1; BAout = 1; Yin = 1;
             end
@@ -302,7 +284,6 @@ module control_unit(
                 Write = 1;
             end
 
-            // --- Branching ---
             BR_3: begin
                 Gra = 1; Rout_ctrl = 1; CONin = 1; 
             end
@@ -311,26 +292,25 @@ module control_unit(
             end
             BR_5: begin
                 Cout = 1; ALU_op = ALU_ADD; Zin = 1; 
+            end
+            BR_6: begin
                 if (CON_out) begin 
                     Zlowout = 1; PCin = 1; 
                 end
             end
 
-            // --- Jump & Link (JAL) ---
             JAL_3: begin
-                PCout = 1; Gra = 1; Rin_ctrl = 1; // Save Return Address to Ra
+                PCout = 1; Gra = 1; Rin_ctrl = 1;
             end
             JAL_4: begin
-                Grb = 1; Rout_ctrl = 1; PCin = 1; // Load PC with Branch Target from Rb
+                Grb = 1; Rout_ctrl = 1; PCin = 1;
             end
 
-            // --- Jump Register (JR) ---
             JR_3: begin
                 Gra = 1; Rout_ctrl = 1; PCin = 1;
             end
             
             HALT_State: begin
-                // Does nothing, system halts.
             end
         endcase
     end
