@@ -9,6 +9,7 @@ module control_unit(
     output reg clear,
     output reg Gra, Grb, Grc,
     output reg Rin_ctrl, Rout_ctrl, BAout,
+    output reg R12in_force,
     output reg PCin, PCout, IncPC, IRin, Yin, Zin, HIin, LOin, MARin, MDRin, MDRout,
     output reg Read, Write,
     output reg Zhighout, Zlowout, HIout, LOout,
@@ -34,6 +35,7 @@ module control_unit(
     parameter HALT_State = 6'd63;
 
     // --- INSTRUCTION Opcodes (IR[31:27]) ---
+    // CPU Specification (Phase 4)
     localparam INST_ADD  = 5'b00000; 
     localparam INST_SUB  = 5'b00001;
     localparam INST_AND  = 5'b00010;
@@ -43,26 +45,25 @@ module control_unit(
     localparam INST_SHL  = 5'b00110;
     localparam INST_ROR  = 5'b00111;
     localparam INST_ROL  = 5'b01000;
-    localparam INST_NEG  = 5'b01001;
-    localparam INST_NOT  = 5'b01010;
-    localparam INST_MUL  = 5'b01011;
+    localparam INST_ADDI = 5'b01001;
+    localparam INST_ANDI = 5'b01010;
+    localparam INST_ORI  = 5'b01011;
     localparam INST_DIV  = 5'b01100;
-    localparam INST_LDI  = 5'b01101; 
-    localparam INST_LD   = 5'b01110;
-    localparam INST_ST   = 5'b01111; 
-    localparam INST_ADDI = 5'b10000;
-    localparam INST_ANDI = 5'b10001;
-    localparam INST_ORI  = 5'b10010;
-    localparam INST_BRMI = 5'b10011;
-    localparam INST_BRPL = 5'b10100;
-    localparam INST_MFHI = 5'b10101;
-    localparam INST_MFLO = 5'b10110;
-    localparam INST_JAL  = 5'b10111;
-    localparam INST_JR   = 5'b11000;
-    localparam INST_IN   = 5'b11001;
-    localparam INST_OUT  = 5'b11010;
-    localparam INST_NOP  = 5'b11110;
-    localparam INST_HALT = 5'b11111;
+    localparam INST_MUL  = 5'b01101;
+    localparam INST_NEG  = 5'b01110;
+    localparam INST_NOT  = 5'b01111;
+    localparam INST_LD   = 5'b10000;
+    localparam INST_LDI  = 5'b10001; 
+    localparam INST_ST   = 5'b10010; 
+    localparam INST_JAL  = 5'b10011;
+    localparam INST_JR   = 5'b10100;
+    localparam INST_BR   = 5'b10101;
+    localparam INST_IN   = 5'b10110;
+    localparam INST_OUT  = 5'b10111;
+    localparam INST_MFHI = 5'b11000;
+    localparam INST_MFLO = 5'b11001;
+    localparam INST_NOP  = 5'b11010;
+    localparam INST_HALT = 5'b11011;
 
     // --- ALU Opcodes (From your ALU.v) ---
     localparam ALU_ADD  = 5'd0; 
@@ -113,7 +114,7 @@ module control_unit(
                         
                         INST_MFHI, INST_MFLO: present_state <= MF_3;
                         
-                        INST_BRMI, INST_BRPL: present_state <= BR_3;
+                        INST_BR: present_state <= BR_3;
                         INST_JAL: present_state <= JAL_3;
                         INST_JR: present_state <= JR_3;
                         INST_IN: present_state <= IN_3;
@@ -177,7 +178,7 @@ module control_unit(
     end
 
     always @(*) begin
-        clear = 0; Gra = 0; Grb = 0; Grc = 0; Rin_ctrl = 0; Rout_ctrl = 0; BAout = 0;
+        clear = 0; Gra = 0; Grb = 0; Grc = 0; Rin_ctrl = 0; Rout_ctrl = 0; BAout = 0; R12in_force = 0;
         PCin = 0; PCout = 0; IncPC = 0; IRin = 0; Yin = 0; Zin = 0; HIin = 0; LOin = 0; 
         MARin = 0; MDRin = 0; MDRout = 0; Read = 0; Write = 0; Zhighout = 0; Zlowout = 0; 
         HIout = 0; LOout = 0; InPortout = 0; Cout = 0; CONin = 0; OutPortin = 0; InPortin = 0;
@@ -316,10 +317,10 @@ module control_unit(
             end
 
             JAL_3: begin
-                PCout = 1; Gra = 1; Rin_ctrl = 1;
+                PCout = 1; Rin_ctrl = 1; R12in_force = 1;
             end
             JAL_4: begin
-                Grb = 1; Rout_ctrl = 1; PCin = 1;
+                Gra = 1; Rout_ctrl = 1; PCin = 1;
             end
 
             JR_3: begin

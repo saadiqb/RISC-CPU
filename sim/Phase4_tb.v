@@ -54,7 +54,7 @@ module Phase4_tb;
     reg [31:0] target_pc;
     reg [8*128:1] dumpfile;
 
-    // Opcode definitions (match control_unit.v)
+    // Opcode definitions (match CPU Specification)
     localparam INST_ADD  = 5'b00000;
     localparam INST_SUB  = 5'b00001;
     localparam INST_AND  = 5'b00010;
@@ -64,26 +64,25 @@ module Phase4_tb;
     localparam INST_SHL  = 5'b00110;
     localparam INST_ROR  = 5'b00111;
     localparam INST_ROL  = 5'b01000;
-    localparam INST_NEG  = 5'b01001;
-    localparam INST_NOT  = 5'b01010;
-    localparam INST_MUL  = 5'b01011;
+    localparam INST_ADDI = 5'b01001;
+    localparam INST_ANDI = 5'b01010;
+    localparam INST_ORI  = 5'b01011;
     localparam INST_DIV  = 5'b01100;
-    localparam INST_LDI  = 5'b01101;
-    localparam INST_LD   = 5'b01110;
-    localparam INST_ST   = 5'b01111;
-    localparam INST_ADDI = 5'b10000;
-    localparam INST_ANDI = 5'b10001;
-    localparam INST_ORI  = 5'b10010;
-    localparam INST_BRMI = 5'b10011;
-    localparam INST_BRPL = 5'b10100;
-    localparam INST_MFHI = 5'b10101;
-    localparam INST_MFLO = 5'b10110;
-    localparam INST_JAL  = 5'b10111;
-    localparam INST_JR   = 5'b11000;
-    localparam INST_IN   = 5'b11001;
-    localparam INST_OUT  = 5'b11010;
-    localparam INST_NOP  = 5'b11110;
-    localparam INST_HALT = 5'b11111;
+    localparam INST_MUL  = 5'b01101;
+    localparam INST_NEG  = 5'b01110;
+    localparam INST_NOT  = 5'b01111;
+    localparam INST_LD   = 5'b10000;
+    localparam INST_LDI  = 5'b10001;
+    localparam INST_ST   = 5'b10010;
+    localparam INST_JAL  = 5'b10011;
+    localparam INST_JR   = 5'b10100;
+    localparam INST_BR   = 5'b10101;
+    localparam INST_IN   = 5'b10110;
+    localparam INST_OUT  = 5'b10111;
+    localparam INST_MFHI = 5'b11000;
+    localparam INST_MFLO = 5'b11001;
+    localparam INST_NOP  = 5'b11010;
+    localparam INST_HALT = 5'b11011;
 
     // Instantiate Top-Level CPU
     cpu DUT (
@@ -220,8 +219,10 @@ module Phase4_tb;
 
     // Log instruction windows for manual zooming in GTKWave
     function [8*12:1] inst_name;
-        input [4:0] op;
+        input [31:0] ir;
+        reg [4:0] op;
         begin
+            op = ir[31:27];
             case (op)
                 INST_ADD:  inst_name = "add";
                 INST_SUB:  inst_name = "sub";
@@ -242,8 +243,15 @@ module Phase4_tb;
                 INST_ADDI: inst_name = "addi";
                 INST_ANDI: inst_name = "andi";
                 INST_ORI:  inst_name = "ori";
-                INST_BRMI: inst_name = "brmi";
-                INST_BRPL: inst_name = "brpl";
+                INST_BR: begin
+                    case (ir[20:19])
+                        2'b00: inst_name = "brzr";
+                        2'b01: inst_name = "brnz";
+                        2'b10: inst_name = "brpl";
+                        2'b11: inst_name = "brmi";
+                        default: inst_name = "br";
+                    endcase
+                end
                 INST_MFHI: inst_name = "mfhi";
                 INST_MFLO: inst_name = "mflo";
                 INST_JAL:  inst_name = "jal";
@@ -262,7 +270,7 @@ module Phase4_tb;
         begin
             case (op)
                 INST_LD, INST_ST: inst_cycles = 6;
-                INST_BRMI, INST_BRPL: inst_cycles = 5;
+                INST_BR: inst_cycles = 5;
                 INST_MUL, INST_DIV: inst_cycles = 5;
                 INST_JAL: inst_cycles = 3;
                 INST_IN:  inst_cycles = 3;
@@ -287,7 +295,7 @@ module Phase4_tb;
                 $time + (cycles * 20),
                 DUT.datapath_inst.PC_data,
                 DUT.datapath_inst.IR_data,
-                inst_name(DUT.datapath_inst.IR_data[31:27]),
+                inst_name(DUT.datapath_inst.IR_data),
                 cycles
             );
         end
@@ -326,90 +334,90 @@ module Phase4_tb;
         DUT.datapath_inst.memory_unit.memory[9'h088] = 32'h0000FFFF;
 
         // --- Phase 3 Program (Addresses 0x000 - 0x028) ---
-        DUT.datapath_inst.memory_unit.memory[9'h000] = 32'h6A800043; // ldi R5, 0x43
-        DUT.datapath_inst.memory_unit.memory[9'h001] = 32'h6AA80006; // ldi R5, 6(R5)
-        DUT.datapath_inst.memory_unit.memory[9'h002] = 32'h72000089; // ld  R4, 0x89
-        DUT.datapath_inst.memory_unit.memory[9'h003] = 32'h6A200004; // ldi R4, 4(R4)
-        DUT.datapath_inst.memory_unit.memory[9'h004] = 32'h7027FFF8; // ld  R0, -8(R4)
-        DUT.datapath_inst.memory_unit.memory[9'h005] = 32'h69000004; // ldi R2, 4
-        DUT.datapath_inst.memory_unit.memory[9'h006] = 32'h6A800087; // ldi R5, 0x87
+        DUT.datapath_inst.memory_unit.memory[9'h000] = 32'h8A800043; // ldi R5, 0x43
+        DUT.datapath_inst.memory_unit.memory[9'h001] = 32'h8AA80006; // ldi R5, 6(R5)
+        DUT.datapath_inst.memory_unit.memory[9'h002] = 32'h82000089; // ld  R4, 0x89
+        DUT.datapath_inst.memory_unit.memory[9'h003] = 32'h8A200004; // ldi R4, 4(R4)
+        DUT.datapath_inst.memory_unit.memory[9'h004] = 32'h8027FFF8; // ld  R0, -8(R4)
+        DUT.datapath_inst.memory_unit.memory[9'h005] = 32'h89000004; // ldi R2, 4
+        DUT.datapath_inst.memory_unit.memory[9'h006] = 32'h8A800087; // ldi R5, 0x87
         
         // --- Branching Test 1 ---
-        DUT.datapath_inst.memory_unit.memory[9'h007] = 32'h9A980003; // brmi R5, 3 (C2=11)
-        DUT.datapath_inst.memory_unit.memory[9'h008] = 32'h6AA80005; // ldi R5, 5(R5)
-        DUT.datapath_inst.memory_unit.memory[9'h009] = 32'h70A7FFFD; // ld  R1, -3(R5)
-        DUT.datapath_inst.memory_unit.memory[9'h00A] = 32'hF0000000; // nop
+        DUT.datapath_inst.memory_unit.memory[9'h007] = 32'hAA980003; // brmi R5, 3 (C2=11)
+        DUT.datapath_inst.memory_unit.memory[9'h008] = 32'h8AA80005; // ldi R5, 5(R5)
+        DUT.datapath_inst.memory_unit.memory[9'h009] = 32'h80AFFFFD; // ld  R1, -3(R5)
+        DUT.datapath_inst.memory_unit.memory[9'h00A] = 32'hD0000000; // nop
         
         // --- Branching Test 2 ---
-        DUT.datapath_inst.memory_unit.memory[9'h00B] = 32'hA0900002; // brpl R1, 2 (C2=10)
-        DUT.datapath_inst.memory_unit.memory[9'h00C] = 32'h69A80007; // ldi R3, 7(R5) (Skipped)
-        DUT.datapath_inst.memory_unit.memory[9'h00D] = 32'h6B9FFFFC; // ldi R7, -4(R3) (Skipped)
+        DUT.datapath_inst.memory_unit.memory[9'h00B] = 32'hA8900002; // brpl R1, 2 (C2=10)
+        DUT.datapath_inst.memory_unit.memory[9'h00C] = 32'h89A80007; // ldi R3, 7(R5) (Skipped)
+        DUT.datapath_inst.memory_unit.memory[9'h00D] = 32'h8B9FFFFC; // ldi R7, -4(R3) (Skipped)
         
         // --- Target: ALU Operations ---
         DUT.datapath_inst.memory_unit.memory[9'h00E] = 32'h03A90000; // add  R7, R5, R2
-        DUT.datapath_inst.memory_unit.memory[9'h00F] = 32'h80880003; // addi R1, R1, 3
-        DUT.datapath_inst.memory_unit.memory[9'h010] = 32'h48880000; // neg  R1, R1
-        DUT.datapath_inst.memory_unit.memory[9'h011] = 32'h50880000; // not  R1, R1
-        DUT.datapath_inst.memory_unit.memory[9'h012] = 32'h8888000F; // andi R1, R1, 0xF
+        DUT.datapath_inst.memory_unit.memory[9'h00F] = 32'h48880003; // addi R1, R1, 3
+        DUT.datapath_inst.memory_unit.memory[9'h010] = 32'h70880000; // neg  R1, R1
+        DUT.datapath_inst.memory_unit.memory[9'h011] = 32'h78880000; // not  R1, R1
+        DUT.datapath_inst.memory_unit.memory[9'h012] = 32'h5088000F; // andi R1, R1, 0xF
         DUT.datapath_inst.memory_unit.memory[9'h013] = 32'h3A010000; // ror  R4, R0, R2
-        DUT.datapath_inst.memory_unit.memory[9'h014] = 32'h90A00005; // ori  R1, R4, 5
+        DUT.datapath_inst.memory_unit.memory[9'h014] = 32'h58A00005; // ori  R1, R4, 5
         DUT.datapath_inst.memory_unit.memory[9'h015] = 32'h2A090000; // shra R4, R1, R2
         DUT.datapath_inst.memory_unit.memory[9'h016] = 32'h22A90000; // shr  R5, R5, R2
         
         // --- Memory Operations ---
-        DUT.datapath_inst.memory_unit.memory[9'h017] = 32'h7A8000A3; // st   0xA3, R5
+        DUT.datapath_inst.memory_unit.memory[9'h017] = 32'h928000A3; // st   0xA3, R5
         DUT.datapath_inst.memory_unit.memory[9'h018] = 32'h42810000; // rol  R5, R0, R2
         DUT.datapath_inst.memory_unit.memory[9'h019] = 32'h1B900000; // or   R7, R2, R0
         DUT.datapath_inst.memory_unit.memory[9'h01A] = 32'h12280000; // and  R4, R5, R0
-        DUT.datapath_inst.memory_unit.memory[9'h01B] = 32'h7BA00089; // st   0x89(R4), R7
+        DUT.datapath_inst.memory_unit.memory[9'h01B] = 32'h93A00089; // st   0x89(R4), R7
         DUT.datapath_inst.memory_unit.memory[9'h01C] = 32'h082B8000; // sub  R0, R5, R7
         DUT.datapath_inst.memory_unit.memory[9'h01D] = 32'h32290000; // shl  R4, R5, R2
         
         // --- Multiply & Divide Setup ---
-        DUT.datapath_inst.memory_unit.memory[9'h01E] = 32'h6B800007; // ldi  R7, 7
-        DUT.datapath_inst.memory_unit.memory[9'h01F] = 32'h69800019; // ldi  R3, 0x19
-        DUT.datapath_inst.memory_unit.memory[9'h020] = 32'h59B80000; // mul  R3, R7
-        DUT.datapath_inst.memory_unit.memory[9'h021] = 32'hA8800000; // mfhi R1
-        DUT.datapath_inst.memory_unit.memory[9'h022] = 32'hB3000000; // mflo R6
+        DUT.datapath_inst.memory_unit.memory[9'h01E] = 32'h8B800007; // ldi  R7, 7
+        DUT.datapath_inst.memory_unit.memory[9'h01F] = 32'h89800019; // ldi  R3, 0x19
+        DUT.datapath_inst.memory_unit.memory[9'h020] = 32'h69B80000; // mul  R3, R7
+        DUT.datapath_inst.memory_unit.memory[9'h021] = 32'hC0800000; // mfhi R1
+        DUT.datapath_inst.memory_unit.memory[9'h022] = 32'hCB000000; // mflo R6
         DUT.datapath_inst.memory_unit.memory[9'h023] = 32'h61B80000; // div  R3, R7
         
         // --- Procedure Setup ---
-        DUT.datapath_inst.memory_unit.memory[9'h024] = 32'h6C380002; // ldi  R8,  2(R7)
-        DUT.datapath_inst.memory_unit.memory[9'h025] = 32'h6C9FFFFC; // ldi  R9, -4(R3)
-        DUT.datapath_inst.memory_unit.memory[9'h026] = 32'h6D300003; // ldi  R10, 3(R6)
-        DUT.datapath_inst.memory_unit.memory[9'h027] = 32'h6D880005; // ldi  R11, 5(R1)
+        DUT.datapath_inst.memory_unit.memory[9'h024] = 32'h8C380002; // ldi  R8,  2(R7)
+        DUT.datapath_inst.memory_unit.memory[9'h025] = 32'h8C9FFFFC; // ldi  R9, -4(R3)
+        DUT.datapath_inst.memory_unit.memory[9'h026] = 32'h8D300003; // ldi  R10, 3(R6)
+        DUT.datapath_inst.memory_unit.memory[9'h027] = 32'h8D880005; // ldi  R11, 5(R1)
         
         // --- Jump and Link (Procedure Call) ---
-        DUT.datapath_inst.memory_unit.memory[9'h028] = 32'hBE500000; // jal  R12, R10
+        DUT.datapath_inst.memory_unit.memory[9'h028] = 32'h9D000000; // jal  R10
 
         // --- Phase 4 Program (Addresses 0x029 - 0x03B) ---
-        DUT.datapath_inst.memory_unit.memory[9'h029] = 32'hCB000000; // in   R6
-        DUT.datapath_inst.memory_unit.memory[9'h02A] = 32'h7B000077; // st   0x77, R6
-        DUT.datapath_inst.memory_unit.memory[9'h02B] = 32'h6980002E; // ldi  R3, 0x2E
-        DUT.datapath_inst.memory_unit.memory[9'h02C] = 32'h6A800001; // ldi  R5, 1
-        DUT.datapath_inst.memory_unit.memory[9'h02D] = 32'h69000028; // ldi  R2, 40
-        DUT.datapath_inst.memory_unit.memory[9'h02E] = 32'hD3000000; // out  R6
-        DUT.datapath_inst.memory_unit.memory[9'h02F] = 32'h6917FFFF; // ldi  R2, -1(R2)
-        DUT.datapath_inst.memory_unit.memory[9'h030] = 32'h99000008; // brzr R2, 8
-        DUT.datapath_inst.memory_unit.memory[9'h031] = 32'h73800088; // ld   R7, 0x88
-        DUT.datapath_inst.memory_unit.memory[9'h032] = 32'h6BBFFFFF; // ldi  R7, -1(R7)
-        DUT.datapath_inst.memory_unit.memory[9'h033] = 32'hF0000000; // nop
-        DUT.datapath_inst.memory_unit.memory[9'h034] = 32'h9B8FFFFD; // brnz R7, -3
+        DUT.datapath_inst.memory_unit.memory[9'h029] = 32'hB3000000; // in   R6
+        DUT.datapath_inst.memory_unit.memory[9'h02A] = 32'h93000077; // st   0x77, R6
+        DUT.datapath_inst.memory_unit.memory[9'h02B] = 32'h8980002E; // ldi  R3, 0x2E
+        DUT.datapath_inst.memory_unit.memory[9'h02C] = 32'h8A800001; // ldi  R5, 1
+        DUT.datapath_inst.memory_unit.memory[9'h02D] = 32'h89000028; // ldi  R2, 40
+        DUT.datapath_inst.memory_unit.memory[9'h02E] = 32'hBB000000; // out  R6
+        DUT.datapath_inst.memory_unit.memory[9'h02F] = 32'h8917FFFF; // ldi  R2, -1(R2)
+        DUT.datapath_inst.memory_unit.memory[9'h030] = 32'hA9000008; // brzr R2, 8
+        DUT.datapath_inst.memory_unit.memory[9'h031] = 32'h83800088; // ld   R7, 0x88
+        DUT.datapath_inst.memory_unit.memory[9'h032] = 32'h8BBFFFFF; // ldi  R7, -1(R7)
+        DUT.datapath_inst.memory_unit.memory[9'h033] = 32'hD0000000; // nop
+        DUT.datapath_inst.memory_unit.memory[9'h034] = 32'hAB8FFFFD; // brnz R7, -3
         DUT.datapath_inst.memory_unit.memory[9'h035] = 32'h23328000; // shr  R6, R6, R5
-        DUT.datapath_inst.memory_unit.memory[9'h036] = 32'h9B0FFFF7; // brnz R6, -9
-        DUT.datapath_inst.memory_unit.memory[9'h037] = 32'h73000077; // ld   R6, 0x77
-        DUT.datapath_inst.memory_unit.memory[9'h038] = 32'hC1800000; // jr   R3
-        DUT.datapath_inst.memory_unit.memory[9'h039] = 32'h6B000063; // ldi  R6, 0x63
-        DUT.datapath_inst.memory_unit.memory[9'h03A] = 32'hD3000000; // out  R6
-        DUT.datapath_inst.memory_unit.memory[9'h03B] = 32'hF8000000; // halt
+        DUT.datapath_inst.memory_unit.memory[9'h036] = 32'hAB0FFFF7; // brnz R6, -9
+        DUT.datapath_inst.memory_unit.memory[9'h037] = 32'h83000077; // ld   R6, 0x77
+        DUT.datapath_inst.memory_unit.memory[9'h038] = 32'hA1800000; // jr   R3
+        DUT.datapath_inst.memory_unit.memory[9'h039] = 32'h8B000063; // ldi  R6, 0x63
+        DUT.datapath_inst.memory_unit.memory[9'h03A] = 32'hBB000000; // out  R6
+        DUT.datapath_inst.memory_unit.memory[9'h03B] = 32'hD8000000; // halt
 
         // 
         // PROCEDURE SUBA (Located at Address 0xB2)
         // 
-        DUT.datapath_inst.memory_unit.memory[9'h0B2] = 32'h0F450000; // sub  R14, R8, R10
+        DUT.datapath_inst.memory_unit.memory[9'h0B2] = 32'h07450000; // sub  R14, R8, R10
         DUT.datapath_inst.memory_unit.memory[9'h0B3] = 32'h0ECD8000; // sub  R13, R9, R11
-        DUT.datapath_inst.memory_unit.memory[9'h0B4] = 32'h07768000; // add  R14, R14, R13
-        DUT.datapath_inst.memory_unit.memory[9'h0B5] = 32'hC6000000; // jr   R12 (Return)
+        DUT.datapath_inst.memory_unit.memory[9'h0B4] = 32'h0F768000; // add  R14, R14, R13
+        DUT.datapath_inst.memory_unit.memory[9'h0B5] = 32'hA6000000; // jr   R12 (Return)
 
         // Initialize CPU control signals
         reset = 1;
