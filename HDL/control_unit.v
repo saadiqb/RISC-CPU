@@ -29,6 +29,8 @@ module control_unit(
     parameter MF_3 = 6'd31;
     parameter JAL_3 = 6'd32, JAL_4 = 6'd33;
     parameter JR_3 = 6'd34;
+    parameter IN_3 = 6'd36, IN_4 = 6'd37;
+    parameter OUT_3 = 6'd38;
     parameter HALT_State = 6'd63;
 
     // --- INSTRUCTION Opcodes (IR[31:27]) ---
@@ -57,6 +59,8 @@ module control_unit(
     localparam INST_MFLO = 5'b10110;
     localparam INST_JAL  = 5'b10111;
     localparam INST_JR   = 5'b11000;
+    localparam INST_IN   = 5'b11001;
+    localparam INST_OUT  = 5'b11010;
     localparam INST_NOP  = 5'b11110;
     localparam INST_HALT = 5'b11111;
 
@@ -112,6 +116,8 @@ module control_unit(
                         INST_BRMI, INST_BRPL: present_state <= BR_3;
                         INST_JAL: present_state <= JAL_3;
                         INST_JR: present_state <= JR_3;
+                        INST_IN: present_state <= IN_3;
+                        INST_OUT: present_state <= OUT_3;
                         
                         INST_NOP: present_state <= Fetch0;
                         INST_HALT: present_state <= HALT_State;
@@ -159,6 +165,10 @@ module control_unit(
                 BR_4: present_state <= BR_5;
                 BR_5: present_state <= BR_6;
                 BR_6: present_state <= Fetch0;
+
+                IN_3: present_state <= IN_4;
+                IN_4: present_state <= Fetch0;
+                OUT_3: present_state <= Fetch0;
 
                 HALT_State: present_state <= HALT_State;
                 default: present_state <= Reset_State;
@@ -314,6 +324,16 @@ module control_unit(
 
             JR_3: begin
                 Gra = 1; Rout_ctrl = 1; PCin = 1;
+            end
+
+            IN_3: begin
+                InPortin = 1;
+            end
+            IN_4: begin
+                InPortout = 1; Gra = 1; Rin_ctrl = 1;
+            end
+            OUT_3: begin
+                Gra = 1; Rout_ctrl = 1; OutPortin = 1;
             end
             
             HALT_State: begin

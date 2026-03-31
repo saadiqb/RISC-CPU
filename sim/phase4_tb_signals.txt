@@ -1,0 +1,32 @@
+Minimum required (Phase 4 doc 3.2):
+  Phase4_tb.DUT.datapath_inst.IR_data
+  Phase4_tb.DUT.datapath_inst.PC_data
+  Phase4_tb.DUT.datapath_inst.MDR_data
+  Phase4_tb.DUT.datapath_inst.MAR_data
+  Phase4_tb.DUT.datapath_inst.HI_data
+  Phase4_tb.DUT.datapath_inst.LO_data
+  Phase4_tb.DUT.datapath_inst.R_data[0]
+  Phase4_tb.DUT.datapath_inst.R_data[1]
+  Phase4_tb.DUT.datapath_inst.R_data[2]
+  Phase4_tb.DUT.datapath_inst.R_data[3]
+  Phase4_tb.DUT.datapath_inst.R_data[4]
+  Phase4_tb.DUT.datapath_inst.R_data[5]
+  Phase4_tb.DUT.datapath_inst.R_data[6]
+  Phase4_tb.DUT.datapath_inst.R_data[7]
+  Phase4_tb.DUT.datapath_inst.R_data[8]
+  Phase4_tb.DUT.datapath_inst.R_data[9]
+  Phase4_tb.DUT.datapath_inst.R_data[10]
+  Phase4_tb.DUT.datapath_inst.R_data[11]
+  Phase4_tb.DUT.datapath_inst.R_data[12]
+  Phase4_tb.DUT.datapath_inst.R_data[13]
+  Phase4_tb.DUT.datapath_inst.R_data[14]
+  Phase4_tb.DUT.datapath_inst.R_data[15]
+
+Additional useful:
+  Phase4_tb.clock
+  Phase4_tb.reset
+  Phase4_tb.stop
+  Phase4_tb.in_port_data
+  Phase4_tb.out_port_data
+  Phase4_tb.DUT.datapath_inst.BusMuxOut
+  Phase4_tb.DUT.datapath_inst.CON_out
