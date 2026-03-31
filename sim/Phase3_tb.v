@@ -95,9 +95,9 @@ module Phase3_tb;
         // =================================================================
         // PROCEDURE SUBA (Located at Address 0xB2)
         // =================================================================
-        DUT.datapath_inst.memory_unit.memory[9'h0B2] = 32'h0F450000; // sub  R14, R8, R10
+        DUT.datapath_inst.memory_unit.memory[9'h0B2] = 32'h07450000; // add  R14, R8, R10
         DUT.datapath_inst.memory_unit.memory[9'h0B3] = 32'h0ECD8000; // sub  R13, R9, R11
-        DUT.datapath_inst.memory_unit.memory[9'h0B4] = 32'h07768000; // add  R14, R14, R13
+        DUT.datapath_inst.memory_unit.memory[9'h0B4] = 32'h0F768000; // sub  R14, R14, R13
         DUT.datapath_inst.memory_unit.memory[9'h0B5] = 32'hA6000000; // jr   R12 (Return to 0x29)
 
         
