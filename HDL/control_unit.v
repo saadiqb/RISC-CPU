@@ -29,6 +29,7 @@ module control_unit(
     parameter MF_3 = 6'd31;
     parameter JAL_3 = 6'd32, JAL_4 = 6'd33;
     parameter JR_3 = 6'd34;
+    parameter IN_3 = 6'd36, OUT_3 = 6'd37;
     parameter HALT_State = 6'd63;
 
     // --- INSTRUCTION Opcodes (IR[31:27]) ---
@@ -41,24 +42,25 @@ module control_unit(
     localparam INST_SHL  = 5'b00110;
     localparam INST_ROR  = 5'b00111;
     localparam INST_ROL  = 5'b01000;
-    localparam INST_NEG  = 5'b01001;
-    localparam INST_NOT  = 5'b01010;
-    localparam INST_MUL  = 5'b01011;
-    localparam INST_DIV  = 5'b01100;
-    localparam INST_LDI  = 5'b01101; 
-    localparam INST_LD   = 5'b01110;
-    localparam INST_ST   = 5'b01111; 
-    localparam INST_ADDI = 5'b10000;
-    localparam INST_ANDI = 5'b10001;
-    localparam INST_ORI  = 5'b10010;
-    localparam INST_BRMI = 5'b10011;
-    localparam INST_BRPL = 5'b10100;
-    localparam INST_MFHI = 5'b10101;
-    localparam INST_MFLO = 5'b10110;
-    localparam INST_JAL  = 5'b10111;
-    localparam INST_JR   = 5'b11000;
-    localparam INST_NOP  = 5'b11110;
-    localparam INST_HALT = 5'b11111;
+    localparam INST_ADDI = 5'b01001; 
+    localparam INST_ANDI = 5'b01010; 
+    localparam INST_ORI  = 5'b01011; 
+    localparam INST_DIV  = 5'b01100; 
+    localparam INST_MUL  = 5'b01101; 
+    localparam INST_NEG  = 5'b01110; 
+    localparam INST_NOT  = 5'b01111; 
+    localparam INST_LD   = 5'b10000; 
+    localparam INST_LDI  = 5'b10001; 
+    localparam INST_ST   = 5'b10010; 
+    localparam INST_JAL  = 5'b10011; 
+    localparam INST_JR   = 5'b10100; 
+    localparam INST_BRANCH = 5'b10101;
+    localparam INST_IN   = 5'b10110; 
+    localparam INST_OUT  = 5'b10111; 
+    localparam INST_MFHI = 5'b11000; 
+    localparam INST_MFLO = 5'b11001; 
+    localparam INST_NOP  = 5'b11010; 
+    localparam INST_HALT = 5'b11011; 
 
     // --- ALU Opcodes (From your ALU.v) ---
     localparam ALU_ADD  = 5'd0; 
@@ -90,7 +92,6 @@ module control_unit(
                 Reset_State: present_state <= Fetch0;
                 Fetch0: present_state <= Fetch1;
                 Fetch1: present_state <= Fetch2;
-
                 Fetch2: present_state <= Decode;
                 
                 Decode: begin
@@ -109,9 +110,12 @@ module control_unit(
                         
                         INST_MFHI, INST_MFLO: present_state <= MF_3;
                         
-                        INST_BRMI, INST_BRPL: present_state <= BR_3;
+                        INST_BRANCH: present_state <= BR_3; 
                         INST_JAL: present_state <= JAL_3;
                         INST_JR: present_state <= JR_3;
+                        
+                        INST_IN: present_state <= IN_3;
+                        INST_OUT: present_state <= OUT_3;
                         
                         INST_NOP: present_state <= Fetch0;
                         INST_HALT: present_state <= HALT_State;
@@ -154,6 +158,9 @@ module control_unit(
                 JAL_4: present_state <= Fetch0;
                 
                 JR_3: present_state <= Fetch0;
+                
+                IN_3: present_state <= Fetch0;
+                OUT_3: present_state <= Fetch0;
 
                 BR_3: present_state <= BR_4;
                 BR_4: present_state <= BR_5;
@@ -187,7 +194,7 @@ module control_unit(
                 MDRout = 1; IRin = 1;
             end
             Decode: begin
-                // Empty state! Signals naturally fall to 0. IR is now locked and stable.
+                // Empty state to let IR stabilize
             end
 
             ALU_3: begin
@@ -314,6 +321,14 @@ module control_unit(
 
             JR_3: begin
                 Gra = 1; Rout_ctrl = 1; PCin = 1;
+            end
+            
+            IN_3: begin
+                InPortout = 1; Gra = 1; Rin_ctrl = 1;
+            end
+            
+            OUT_3: begin
+                Gra = 1; Rout_ctrl = 1; OutPortin = 1;
             end
             
             HALT_State: begin
