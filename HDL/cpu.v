@@ -13,6 +13,7 @@ module cpu(
     wire clear;
     wire Gra, Grb, Grc;
     wire Rin_ctrl, Rout_ctrl, BAout;
+    wire R12in_force;
     wire PCin, PCout, IncPC, IRin, Yin, Zin, HIin, LOin, MARin, MDRin, MDRout;
     wire Read, Write;
     wire Zhighout, Zlowout, HIout, LOout;
@@ -28,7 +29,7 @@ module cpu(
         .clock(clock), 
         .clear(clear), // Driven by control unit reset state
         .Gra(Gra), .Grb(Grb), .Grc(Grc),
-        .Rin_ctrl(Rin_ctrl), .Rout_ctrl(Rout_ctrl), .BAout(BAout),
+        .Rin_ctrl(Rin_ctrl), .Rout_ctrl(Rout_ctrl), .BAout(BAout), .R12in_force(R12in_force),
         .PCin(PCin), .PCout(PCout), .IncPC(IncPC), .IRin(IRin), 
         .Yin(Yin), .Zin(Zin), .HIin(HIin), .LOin(LOin), 
         .MARin(MARin), .MDRin(MDRin), .MDRout(MDRout), 
@@ -53,7 +54,7 @@ module cpu(
         .CON_out(CON_out),
         .clear(clear),
         .Gra(Gra), .Grb(Grb), .Grc(Grc),
-        .Rin_ctrl(Rin_ctrl), .Rout_ctrl(Rout_ctrl), .BAout(BAout),
+        .Rin_ctrl(Rin_ctrl), .Rout_ctrl(Rout_ctrl), .BAout(BAout), .R12in_force(R12in_force),
         .PCin(PCin), .PCout(PCout), .IncPC(IncPC), .IRin(IRin), 
         .Yin(Yin), .Zin(Zin), .HIin(HIin), .LOin(LOin), 
         .MARin(MARin), .MDRin(MDRin), .MDRout(MDRout), 

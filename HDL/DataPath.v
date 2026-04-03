@@ -4,6 +4,7 @@ module DataPath(
     // Phase 2: Select and Encode Control Signals
     input wire Gra, Grb, Grc,
     input wire Rin_ctrl, Rout_ctrl, BAout,
+    input wire R12in_force,
 
     // Phase 1 & 2: Datapath Control Signals
     input wire PCin, PCout, IncPC, IRin, Yin, Zin, HIin, LOin, MARin, MDRin, MDRout, 
@@ -41,6 +42,7 @@ module DataPath(
     select_and_encode sel_enc (
         .IR(IR_data), .Gra(Gra), .Grb(Grb), .Grc(Grc),
         .Rin(Rin_ctrl), .Rout(Rout_ctrl), .BAout(BAout), .Cout(Cout),
+        .R12in_force(R12in_force),
         .Rin_bus(Rin_bus), .Rout_bus(Rout_bus), .C_bus(C_sign_extended)
     );
 

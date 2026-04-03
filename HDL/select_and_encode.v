@@ -6,7 +6,8 @@ module select_and_encode (
     input wire Rin,       
     input wire Rout,        
     input wire BAout,         
-    input wire Cout,   
+    input wire Cout,
+    input wire R12in_force,
 
     output wire [15:0] Rin_bus, 
     output wire [15:0] Rout_bus, 
@@ -41,7 +42,9 @@ module select_and_encode (
     wire read_enable  = Rout | BAout; 
 
     // Generate the final one-hot output buses
-    assign Rin_bus  = write_enable ? decoder_out : 16'b0;
+    assign Rin_bus  = write_enable
+        ? (R12in_force ? 16'b0001_0000_0000_0000 : decoder_out)
+        : 16'b0;
     assign Rout_bus = read_enable  ? decoder_out : 16'b0;
 
     // 6. Sign extension logic (19-bit to 32-bit)
