@@ -11,6 +11,7 @@ module Phase4_tb;
     wire [31:0] mem_089;
     wire [31:0] mem_0A3;
     wire [31:0] mem_088;
+    wire [31:0] mem_077;
     wire [31:0] IR;
     wire [31:0] PC;
     wire [31:0] MDR;
@@ -98,6 +99,7 @@ module Phase4_tb;
     assign mem_089 = DUT.datapath_inst.memory_unit.memory[9'h089];
     assign mem_0A3 = DUT.datapath_inst.memory_unit.memory[9'h0A3];
     assign mem_088 = DUT.datapath_inst.memory_unit.memory[9'h088];
+    assign mem_077 = DUT.datapath_inst.memory_unit.memory[9'h077];
 
     // Short alias signals for GTKWave readability
     assign IR  = DUT.datapath_inst.IR_data;
@@ -208,7 +210,8 @@ module Phase4_tb;
             Phase4_tb.Zin_sig,
             Phase4_tb.mem_089,
             Phase4_tb.mem_0A3,
-            Phase4_tb.mem_088
+            Phase4_tb.mem_088,
+            Phase4_tb.mem_077
         );
 
         // If targeting a specific instruction window, start with dumping off.
@@ -331,7 +334,7 @@ module Phase4_tb;
         // Memory Initilization
         DUT.datapath_inst.memory_unit.memory[9'h089] = 32'h000000A7;
         DUT.datapath_inst.memory_unit.memory[9'h0A3] = 32'h00000068;
-        DUT.datapath_inst.memory_unit.memory[9'h088] = 32'h0000FFFF;
+        DUT.datapath_inst.memory_unit.memory[9'h088] = 32'h0000000A;
 
         // --- Phase 3 Program (Addresses 0x000 - 0x028) ---
         DUT.datapath_inst.memory_unit.memory[9'h000] = 32'h8A800043; // ldi R5, 0x43
@@ -395,7 +398,7 @@ module Phase4_tb;
         DUT.datapath_inst.memory_unit.memory[9'h02A] = 32'h93000077; // st   0x77, R6
         DUT.datapath_inst.memory_unit.memory[9'h02B] = 32'h8980002E; // ldi  R3, 0x2E
         DUT.datapath_inst.memory_unit.memory[9'h02C] = 32'h8A800001; // ldi  R5, 1
-        DUT.datapath_inst.memory_unit.memory[9'h02D] = 32'h89000028; // ldi  R2, 40
+        DUT.datapath_inst.memory_unit.memory[9'h02D] = 32'h89000002; // ldi  R2, 2
         DUT.datapath_inst.memory_unit.memory[9'h02E] = 32'hBB000000; // out  R6
         DUT.datapath_inst.memory_unit.memory[9'h02F] = 32'h8917FFFF; // ldi  R2, -1(R2)
         DUT.datapath_inst.memory_unit.memory[9'h030] = 32'hA9000008; // brzr R2, 8

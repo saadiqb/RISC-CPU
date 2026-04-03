@@ -39,6 +39,7 @@ set signals [list \
     "Phase4_tb.mem_089" \
     "Phase4_tb.mem_0A3" \
     "Phase4_tb.mem_088" \
+    "Phase4_tb.mem_077" \
 ]
 
 set num_added [ gtkwave::addSignalsFromList $signals ]
