@@ -45,6 +45,7 @@ module Phase4_tb;
     integer inst_log;
     integer window_cycles;
     integer window_left;
+    integer cycles;
     reg target_mode;
     reg match_on_ir;
     reg match_on_addr;
@@ -291,7 +292,6 @@ module Phase4_tb;
 
     always @(posedge clock) begin
         if (DUT.datapath_inst.IRin) begin
-            integer cycles;
             cycles = inst_cycles(DUT.datapath_inst.IR_data[31:27]);
             $fdisplay(inst_log, "%0t,%0t,0x%08h,0x%08h,%s,%0d",
                 $time,
